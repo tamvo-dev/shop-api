@@ -5,6 +5,7 @@ import com.learnspringboot.shop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,15 +23,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public ResponseEntity<Object> getUsers(){
         return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/users", method = RequestMethod.POST)
-    public ResponseEntity<String> createUser(@RequestBody User user){
-        userService.createUser(user);
-        return new ResponseEntity<>("Create user success", HttpStatus.OK);
     }
 
     @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
@@ -43,5 +41,13 @@ public class UserController {
     public ResponseEntity<String> updateUser(@PathVariable("id") long id, @RequestBody User user){
         userService.updateUser(user, id);
         return new ResponseEntity<>("Update user success", HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public ResponseEntity<String> createUser(@RequestBody User user){
+        String password = passwordEncoder.encode(user.getPassword());
+        user.setPassword(password);
+        userService.createUser(user);
+        return new ResponseEntity<>("Create user success", HttpStatus.OK);
     }
 }
